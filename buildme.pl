@@ -523,8 +523,8 @@ sub buildDockerImage {
 			" --tag ghcr.io/$org/$defaultDestName:$_";
 		} @tags);
 
-use Data::Dump;
-warn Data::Dump::dump(\@tags, $tags);
+use Data::Dumper;
+warn Dumper(\@tags, $tags);
 
 		system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64 $tags .");
 	}
