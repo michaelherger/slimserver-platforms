@@ -515,23 +515,8 @@ sub buildDockerImage {
 		" --tag lmscommunity/$defaultDestName:$_";
 	} @tags);
 
-	# system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64,linux/arm64/v8 $tags .") == 0
-		# 	or die("Docker build failed: $!");
-
-	# push to Github container registry
-	if (my $org = $ENV{GITHUB_REPOSITORY_OWNER}) {
-		$tags = join(' ', map {
-			" --tag ghcr.io/$org/$defaultDestName:$_";
-		} @tags);
-
-use Data::Dumper;
-		# system("docker logout && echo $ENV{GITHUB_TOKEN} | docker login ghcr.io -u michaelherger --password-stdin") == 0
-		system("docker logout") == 0
-			or die("Docker logout failed: $!");
-
-		system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64 $tags .") == 0
+	system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64,linux/arm64/v8 $tags .") == 0
 			or die("Docker build failed: $!");
-	}
 }
 
 ##############################################################################################
