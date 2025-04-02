@@ -524,7 +524,9 @@ sub buildDockerImage {
 			" --tag ghcr.io/$org/$defaultDestName:$_";
 		} @tags);
 
-		system("docker logout && docker login ghcr.io -u michaelherger -p $ENV{GITHUB_TOKEN}.") == 0
+use Data::Dumper;
+		print Dumper(keys %ENV);
+		system("docker logout && echo $ENV{GITHUB_TOKEN} | docker login ghcr.io -u michaelherger --password-stdin") == 0
 			or die("Docker build failed: $!");
 
 		system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64 $tags .") == 0
