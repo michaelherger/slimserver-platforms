@@ -52,7 +52,7 @@ my $dirsToExcludeForDocker = "$dirsToExcludeForLinuxPackage 5.20 5.22 5.24 5.26 
 my $dirsToExcludeForEncore = "$dirsToExcludeForLinuxPackage 5.20 5.24 5.26 5.28 5.30 5.32 5.34 5.36 5.38 5.40 i386-linux arm-linux armhf-linux aarch64-linux i86pc-solaris-thread-multi-64int sparc-linux powerpc-linux icudt46l.dat icudt46b.dat";
 
 ## Initialize some variables we'll use later
-my ($build, $destName, $destDir, $buildDir, $sourceDir, $version, $noCPAN, $fakeRoot, $light, $freebsd, $arm, $encore, $ppc, $x86_64, $i386, $releaseType, $release, $tag);
+my ($build, $destName, $destDir, $buildDir, $sourceDir, $version, $noCPAN, $fakeRoot, $light, $freebsd, $arm, $encore, $ppc, $x86_64, $i386, $releaseType, $release, $tag, $registry);
 
 
 ##############################################################################################
@@ -103,6 +103,7 @@ sub checkCommandOptions {
 			'light'         => \$light,
 			'releaseType=s' => \$releaseType,
 			'tag=s'         => \$tag,
+			'registry=s'    => \$registry,
 			'fakeRoot'      => \$fakeRoot);
 
 	if ( !$build ) {
@@ -439,6 +440,7 @@ sub showUsage {
 	print "--- Building a Docker image (with only ARM and x86_64 Linux binaries)\n";
 	print "    --build docker <required opts above>\n";
 	print "    --tag <tag>                  - additional tag for the Docker image\n";
+	print "    --registry <registry>        - registry to push the image to\n";
 	print "\n";
 	print "--- Building an RPM package\n";
 	print "    --build rpm <required opts above>\n";
@@ -511,8 +513,11 @@ sub buildDockerImage {
 	$tag ||= "rc" if $releaseType eq "release";
 	push @tags, $tag if $tag;
 
+	$registry ||= "lmscommunity";
+	print "INFO: Using registry $registry\n";
+
 	my $tags = join(' ', map {
-		" --tag lmscommunity/$defaultDestName:$_";
+		" --tag $registry/$defaultDestName:$_";
 	} @tags);
 
 	system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64,linux/arm64/v8 $tags .") == 0
