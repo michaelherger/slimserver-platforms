@@ -515,7 +515,19 @@ sub buildDockerImage {
 		" --tag lmscommunity/$defaultDestName:$_";
 	} @tags);
 
-	system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64,linux/arm64/v8 $tags .");
+	# system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64,linux/arm64/v8 $tags .");
+
+	# push to Github container registry
+	if (my $org = $ENV{GITHUB_REPOSITORY_OWNER}) {
+		$tags = join(' ', map {
+			" --tag ghcr.io/$org/$defaultDestName:$_";
+		} @tags);
+
+use Data::Dump;
+warn Data::Dump::dump(\@tags, $tags);
+
+		system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64 $tags .");
+	}
 
 	die('Docker build failed') if $? & 127;
 }
