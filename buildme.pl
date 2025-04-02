@@ -525,9 +525,9 @@ sub buildDockerImage {
 		} @tags);
 
 use Data::Dumper;
-		print Dumper(keys %ENV);
-		system("docker logout && echo $ENV{GITHUB_TOKEN} | docker login ghcr.io -u michaelherger --password-stdin") == 0
-			or die("Docker build failed: $!");
+		# system("docker logout && echo $ENV{GITHUB_TOKEN} | docker login ghcr.io -u michaelherger --password-stdin") == 0
+		system("docker logout") == 0
+			or die("Docker logout failed: $!");
 
 		system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64 $tags .") == 0
 			or die("Docker build failed: $!");
