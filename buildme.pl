@@ -513,16 +513,26 @@ sub buildDockerImage {
 	$tag ||= "rc" if $releaseType eq "release";
 	push @tags, $tag if $tag;
 
-	$registry ||= "lmscommunity";
-	$registry = lc($registry);
-	print "INFO: Using registry $registry\n";
+# TODO - REMOVE!!!
+	@tags = ('IGNORETHIS');
+
+	_runDocker($workDir, 'lmscommunity', @tags);
+
+	# push to Github container registry
+	if (my $org = $ENV{GITHUB_REPOSITORY_OWNER}) {
+		_runDocker($workDir, "ghcr.io/$org", @tags);
+	}
+}
+
+sub _runDocker {
+	my ($workDir, $repository, @tags) = @_;
 
 	my $tags = join(' ', map {
-		" --tag $registry/$defaultDestName:$_";
+		" --tag lmscommunity/$defaultDestName:$_";
 	} @tags);
 
 	system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64,linux/arm64/v8 $tags .") == 0
-			or die("Docker build failed: $!");
+		or die("Docker build failed: $!");
 }
 
 ##############################################################################################
