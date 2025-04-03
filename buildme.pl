@@ -516,12 +516,11 @@ sub buildDockerImage {
 # TODO - REMOVE!!!
 	@tags = ('IGNORETHIS');
 
+	# push to Docker Hub
 	_runDocker($workDir, 'lmscommunity', @tags);
 
 	# push to Github container registry
-	if (my $org = $ENV{GITHUB_REPOSITORY_OWNER}) {
-		_runDocker($workDir, "ghcr.io/$org", @tags);
-	}
+	_runDocker($workDir, "ghcr.io/$org", @tags);
 }
 
 sub _runDocker {
