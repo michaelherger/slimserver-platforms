@@ -440,7 +440,7 @@ sub showUsage {
 	print "--- Building a Docker image (with only ARM and x86_64 Linux binaries)\n";
 	print "    --build docker <required opts above>\n";
 	print "    --tag <tag>                  - additional tag for the Docker image\n";
-	print "    --registry <registry>        - registry to push the image to\n";
+	print "    --registry <registry>        - registry to push the image to (in addition to Dockerhub\n";
 	print "\n";
 	print "--- Building an RPM package\n";
 	print "    --build rpm <required opts above>\n";
@@ -519,15 +519,16 @@ sub buildDockerImage {
 	# push to Docker Hub
 	_runDocker($workDir, 'lmscommunity', @tags);
 
-	# push to Github container registry
-	_runDocker($workDir, "ghcr.io/$org", @tags);
+	# push to additional container registry (if defined)
+	_runDocker($workDir, $registry, @tags) if $registry;
 }
 
 sub _runDocker {
 	my ($workDir, $repository, @tags) = @_;
+	$repository = lc($repository);
 
 	my $tags = join(' ', map {
-		" --tag lmscommunity/$defaultDestName:$_";
+		" --tag $repository/$defaultDestName:$_";
 	} @tags);
 
 	system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64,linux/arm64/v8 $tags .") == 0
