@@ -524,12 +524,14 @@ sub buildDockerImage {
 	foreach my $r ('lmscommunity', $registry) {
 		next unless $r;
 
-		my $name = lc($r) . '/' . $defaultDestName;
+		my $tag = ' --tag ' . lc($r) . '/' . $defaultDestName;
 
 		foreach my $t (@tags) {
-			$tags .= "$name:$t ";
+			$tags .= "$tag:$t";
 		}
 	}
+
+	print "INFO: Building Docker image with tags: $tags\n";
 
 	system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64,linux/arm64/v8 $tags .") == 0
 		or die("Docker build failed: $!");
