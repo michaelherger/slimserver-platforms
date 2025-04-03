@@ -361,6 +361,8 @@ sub doCommandOptions {
 ## Create MD5 checksum files for each build                                                 ##
 ##############################################################################################
 sub createMD5Checksums {
+	return if $build eq 'docker';
+
 	opendir(my $dh, $destDir) or do {
 		warn "Cannot open directory $destDir: $!";
 		return;
@@ -516,20 +518,18 @@ sub buildDockerImage {
 # TODO - REMOVE!!!
 	@tags = ('IGNORETHIS');
 
-	# push to Docker Hub
-	_runDocker($workDir, 'lmscommunity', @tags);
+	$registry = lc($registry) if $registry;
 
-	# push to additional container registry (if defined)
-	_runDocker($workDir, $registry, @tags) if $registry;
-}
+	my $tags;
+	foreach my $r ('lmscommunity', $registry) {
+		next unless $r;
 
-sub _runDocker {
-	my ($workDir, $repository, @tags) = @_;
-	$repository = lc($repository);
+		my $name = lc($r) . '/' . $defaultDestName;
 
-	my $tags = join(' ', map {
-		" --tag $repository/$defaultDestName:$_";
-	} @tags);
+		foreach my $t (@tags) {
+			$tags .= "$name:$t ";
+		}
+	}
 
 	system("cd $workDir; docker buildx build --push --platform linux/arm/v7,linux/amd64,linux/arm64/v8 $tags .") == 0
 		or die("Docker build failed: $!");
